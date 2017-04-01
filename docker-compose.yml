@@ -1,0 +1,42 @@
+version: "2.1"
+services:
+     frontendproxy:
+          build:
+               context: .
+               dockerfile: ${KEYSTORE_FRONTEND_DOCKERFILE}
+          container_name: frontend_proxy
+          ports:
+               - "80:80"
+          volumes:
+               - "${KEYSTORE_DATA_DIR}/frontend:${KEYSTORE_MOUNT_DIR}/frontend"
+          links:
+               - "backend"
+               - "database"
+          environment:
+               - RESOURCE_DIR_HOST=${RESOURCE_DIR_HOST}
+     backend:
+          build:
+               context: .
+               dockerfile: ${KEYSTORE_BACKEND_DOCKERFILE}
+          container_name: backend_tomcat
+          ports:
+               - "8888:8080"
+          volumes:
+               - "${KEYSTORE_DATA_DIR}/backend:${KEYSTORE_MOUNT_DIR}/backend"
+          environment:
+               - DATABASE_HOST=${DATABASE_HOST}
+     database:
+          build:
+               context: .
+               dockerfile: ${KEYSTORE_DATABASE_DOCKERFILE}
+          container_name: mysql
+          ports:
+               - "3306:3306"
+          volumes:
+               - "${KEYSTORE_DATA_DIR}/scripts:${KEYSTORE_MOUNT_DIR}/scripts"
+               - "${KEYSTORE_DATA_DIR}/sql_data:/var/lib/mysql"
+          environment:
+               - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+               - MYSQL_DATABASE=${MYSQL_DATABASE}
+               - MYSQL_USER=${MYSQL_USER}
+               - MYSQL_PASSWORD=${MYSQL_PASSWORD}
